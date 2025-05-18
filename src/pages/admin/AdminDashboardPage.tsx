@@ -1,12 +1,15 @@
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { appointmentService, doctorService, staffService } from "@/services/api";
+import { AppointmentResponse, DoctorResponse, StaffResponse } from "@/types";
 import { Calendar, DollarSign, Hospital, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: number;
   description: string;
   icon: JSX.Element;
 }
@@ -27,6 +30,34 @@ function StatCard({ title, value, description, icon }: StatCardProps) {
 }
 
 export default function AdminDashboardPage() {
+
+const [staff, setStaff] = useState<StaffResponse[]>([]);
+const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
+const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const appointmentsResponse = await appointmentService.getAllAppointments();
+        const doctorsResponse = await doctorService.getAllDoctors();
+        const StaffResponse = await staffService.getAllStaff();
+        
+        setAppointments(appointmentsResponse.data);
+        setDoctors(doctorsResponse.data);
+        setStaff(StaffResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const [stats, setStats] = useState({
     totalDoctors: '0',
     totalStaff: '0',
@@ -65,25 +96,25 @@ export default function AdminDashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Doctors"
-            value={stats.totalDoctors}
+            value={doctors.length}
             description="+2 since last month"
             icon={<Hospital className="h-4 w-4 text-muted-foreground" />}
           />
           <StatCard
             title="Total Staff"
-            value={stats.totalStaff}
+            value={staff.length}
             description="+4 since last month"
             icon={<Users className="h-4 w-4 text-muted-foreground" />}
           />
           <StatCard
             title="Appointments"
-            value={stats.totalAppointments}
+            value={appointments.length}
             description="+18% from last month"
             icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
           />
           <StatCard
             title="Monthly Revenue"
-            value={stats.revenue}
+            value={200}
             description="+15% from last month"
             icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
           />

@@ -59,6 +59,13 @@ export default function AppointmentBookingPage() {
       const [hours, minutes] = values.appointmentTime.split(':').map(Number);
       
       date.setHours(hours, minutes);
+
+      console.log(values.patientEmail);
+      console.log(values.patientName);
+      console.log(values.patientNumber);
+      console.log(values.appointmentDate.toISOString());
+      console.log(values.problemDescription);
+      console.log(values.mode);
       
       const appointmentRequest: AppointmentRequest = {
         patientName: values.patientName,

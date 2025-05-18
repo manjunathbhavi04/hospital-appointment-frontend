@@ -33,6 +33,8 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values.username);
+    console.log(values.password);
     try {
       setIsLoading(true);
       await login(values.username, values.password);

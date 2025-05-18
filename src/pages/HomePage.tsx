@@ -40,7 +40,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="bg-white text-hospital-600 hover:bg-gray-100">
                 Contact Us
               </Button>
             </Link>

@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authService } from '@/services/api';
+import { authService, userService } from '@/services/api';
 import { toast } from 'sonner';
 import { Role, User } from '@/types';
 import { useNavigate } from 'react-router-dom';
@@ -50,9 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (username: string, password: string): Promise<void> => {
+    console.log("was here");
     try {
       setLoading(true);
+      console.log("was here 1");
       const response = await authService.login({ username, password });
+      console.log("was here 2");
       const { token } = response.data;
 
       // Store token
@@ -60,15 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // For demo purposes, we'll mock the user data from the token (normally decoded from JWT)
       // In a real app, you'd have an endpoint to get user details or decode the JWT
-      const userData: User = {
-        userId: 1, // This would be decoded from JWT
-        username,
-        email: `${username}@example.com`, // This would be decoded from JWT
-        role: username.includes('admin') ? Role.ADMIN 
-              : username.includes('doctor') ? Role.DOCTOR 
-              : username.includes('staff') ? Role.STAFF 
-              : Role.PATIENT, // This would be decoded from JWT
-      };
+      console.log("was here");
+      const userResponse = await userService.getByUsername(username);
+      const userData: User = userResponse.data;
 
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);

@@ -41,7 +41,7 @@ export interface Patient {
 export interface Doctor {
   doctorId: number;
   fullName: string;
-  specialization: string;
+  specialization: Speciality;
   phoneNumber: string;
   consultationFee: number;
   user?: User;
@@ -73,7 +73,7 @@ export interface AppointmentResponse {
   patientName: string;
   appointmentDateTime: string;
   status: AppointmentStatus;
-  reason?: string;
+  mode: AppointmentMode;
   problemDescription: string;
 }
 
@@ -107,6 +107,19 @@ export interface Speciality {
 export interface LoginRequest {
   username: string;
   password: string;
+}
+
+export interface BillResponse {
+  billingId: number;
+  patientName: string;
+  doctorName: Doctor;
+  billingDate: string;
+  consultationFee: number;
+  labFee: number;
+  medicineFee: number;
+  totalAmount: number;
+  paymentStatus: PaymentStatus;
+  appointmentId?: number;
 }
 
 export interface JwtResponse {
@@ -143,6 +156,20 @@ export interface DoctorResponse {
   specialization: string;
   phoneNumber: string;
   email: string;
+}
+
+export interface VideoRoomInfo {
+  roomUrl: string;
+  roomName: string;
+  expiresAt?: string;
+}
+
+
+export interface DoctorUpdate {
+  fullName: string,
+  phoneNumber: string,
+  specialization: Speciality,
+  consultationFee: number
 }
 
 export interface StaffResponse {

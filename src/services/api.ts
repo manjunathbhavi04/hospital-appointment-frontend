@@ -1,17 +1,20 @@
-
 import axios from 'axios';
-import { 
-  AppointmentRequest, 
-  AssignDoctorRequest, 
-  DoctorRequest, 
-  LoginRequest, 
+import {
+  AppointmentRequest,
+  AssignDoctorRequest,
+  DoctorRequest,
+  LoginRequest,
   StaffRequest,
-  AppointmentStatus
+  AppointmentStatus,
+  BillResponse,
+  Doctor,
+  DoctorResponse,
+  DoctorUpdate
 } from '@/types';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: '/api', // Adjust this to your actual API base URL if needed
+  baseURL: 'http://localhost:8080', // Adjust this to your actual API base URL if needed
   headers: {
     'Content-Type': 'application/json',
   }
@@ -30,7 +33,7 @@ api.interceptors.request.use((config) => {
 
 // Authentication
 export const authService = {
-  login: (credentials: LoginRequest) => api.post('/auth/login', credentials),
+  login: (credentials: LoginRequest) => api.post('/api/auth/login', credentials),
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -51,9 +54,10 @@ export const patientService = {
 
 // Appointment services
 export const appointmentService = {
-  bookAppointment: (appointment: AppointmentRequest) => api.post('/appointments/book', appointment),
+  getAllAppointments: () => api.get('/api/appointments'),
+  bookAppointment: (appointment: AppointmentRequest) => api.post('/api/appointments/book', appointment),
   getPendingAppointments: () => api.get('/appointments/pending'),
-  getAppointmentsByStatus: (status: AppointmentStatus) => api.get(`/appointments/status?status=${status}`)
+  getAppointmentsByStatus: (status: AppointmentStatus) => api.get(`/api/appointments/${status}`)
 };
 
 // Doctor services
@@ -62,17 +66,21 @@ export const doctorService = {
   getMyAppointments: () => api.get('/api/doctor/appointments'),
   completeAppointment: (appointmentId: number) => api.put(`/api/doctor/appointments/${appointmentId}/complete`),
   getScheduledAppointments: () => api.get('/api/doctor/appointments/scheduled'),
-  registerDoctor: (doctor: DoctorRequest) => api.post('/api/register/doctor', doctor)
+  registerDoctor: (doctor: DoctorRequest) => api.post('/api/register/doctor', doctor),
+  updateDoctor: (doctorId: number, doctorData: DoctorUpdate) =>
+    api.put(`/api/doctor/update/${doctorId}`, doctorData),
+  joinVideoConsultation: (appointmentId: number) => api.get(`/api/video/join/${appointmentId}`)
+
 };
 
 // Staff services
 export const staffService = {
   getAllStaff: () => api.get('/api/staff'),
-  assignDoctor: (assignDoctorRequest: AssignDoctorRequest) => 
+  assignDoctor: (assignDoctorRequest: AssignDoctorRequest) =>
     api.post('/api/staff/assign/doctor', assignDoctorRequest),
-  assignDoctorToAppointment: (appointmentId: number, doctorId: number) => 
+  assignDoctorToAppointment: (appointmentId: number, doctorId: number) =>
     api.post(`/api/staff/assign/doctor/${appointmentId}?doctorId=${doctorId}`),
-  updateAppointmentStatus: (appointmentId: number, status: AppointmentStatus) => 
+  updateAppointmentStatus: (appointmentId: number, status: AppointmentStatus) =>
     api.put(`/api/staff/appointments/${appointmentId}/status?status=${status}`),
   getPendingAppointments: () => api.get('/api/staff/appointments/pending'),
   registerStaff: (staff: StaffRequest) => api.post('/api/register/staff', staff)
@@ -80,18 +88,26 @@ export const staffService = {
 
 // Speciality services
 export const specialityService = {
-  getAllSpeciality: () => api.get('/speciality'),
-  getSpeciality: (id: number) => api.get(`/speciality/${id}`),
-  updateSpeciality: (name: string, id: number) => api.put(`/speciality/${id}/update?name=${name}`),
-  addSpeciality: (name: string) => api.post(`/speciality/add/${name}`)
+  getAllSpeciality: () => api.get('/api/speciality'),
+  getSpeciality: (id: number) => api.get(`/api/speciality/${id}`),
+  updateSpeciality: (name: string, id: number) => api.put(`/api/speciality/${id}/update?name=${name}`),
+  addSpeciality: (name: string) => api.post(`/api/speciality/add/${name}`),
+  getSpecialityByName: (name: string) => api.get(`/api/speciality/name/${name}`)
 };
 
 // Billing services
 export const billingService = {
-  generateBill: (patientId: number, doctorId: number, labFee: number, medicineFee: number) => 
-    api.post(`/billing/generate?patientId=${patientId}&doctorId=${doctorId}&labFee=${labFee}&medicineFee=${medicineFee}`),
+  generateBill: (appointmentId: number, patientId: number, doctorId: number, labFee: number, medicineFee: number) =>
+    api.post(`/billing/generate?appointmentId=${appointmentId}&patientId=${patientId}&doctorId=${doctorId}&labFee=${labFee}&medicineFee=${medicineFee}`),
   markAsPaid: (billingId: number) => api.put(`/billing/${billingId}/pay`),
-  downloadInvoice: (billingId: number) => api.get(`/billing/${billingId}/download-invoice`, { responseType: 'blob' })
+  downloadInvoice: (billingId: number) => api.get(`/billing/${billingId}/download-invoice`, { responseType: 'blob' }),
+  getBillByAppointment: (appointmentId: number) => api.get(`/billing/${appointmentId}`)
+};
+
+// User services - properly exported
+export const userService = {
+  getByUsername: (username: string) => api.get(`/api/user/${username}`),
 };
 
 export default api;
+
